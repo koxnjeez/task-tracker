@@ -25,18 +25,30 @@
     </div>
     <div class="links-container">
       <router-link to="/">Projects</router-link>
-      <router-link to="/auth">Log in</router-link>
+      <router-link to="/auth" v-if="!employeeStore.isAuthenticated">
+        Log in
+      </router-link>
+      <router-link to="/profile" v-else>Profile</router-link>
     </div>
   </div>
 </template>
 
+<script setup>
+import { useStoreEmployee } from "@/stores/storeEmployee";
+
+const employeeStore = useStoreEmployee();
+</script>
+
 <style scoped>
 .navbar-container {
+  width: 100%;
   height: 3.5rem;
   /* background: pink; */
   display: flex;
   align-items: center;
   justify-content: center;
+  position: fixed;
+  z-index: 1;
 }
 .logo-container {
   display: flex;
@@ -59,6 +71,9 @@
 .links-container {
   display: flex;
   gap: 2rem;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   font-weight: 300;
 }
 </style>

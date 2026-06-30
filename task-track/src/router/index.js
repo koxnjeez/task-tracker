@@ -1,10 +1,11 @@
-import { createRouter, createWebHashHistory } from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
+import { useStoreEmployee } from "@/stores/storeEmployee";
 import ViewProjects from "@/view/ViewProjects.vue";
 import ViewProfile from "@/view/ViewProfile.vue";
 import ViewAuth from "@/view/ViewAuth.vue";
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes: [
     {
       path: "/",
@@ -18,10 +19,32 @@ const router = createRouter({
     },
     {
       path: "/auth",
-      name: "authorization",
+      name: "auth",
       component: ViewAuth,
     },
   ],
+  linkActiveClass: "active",
+});
+
+router.beforeEach(async (to, from) => {
+  const employeeStore = useStoreEmployee();
+
+  if (employeeStore.token && !employeeStore.user) {
+    try {
+      await employeeStore.fetchCurrentUser();
+    } catch (error) {
+      employeeStore.logout();
+      return "/auth";
+    }
+  }
+
+  if (to.name === "auth" && employeeStore.isAuthenticated) {
+    return "/profile";
+  } else if (to.name === "profile" && !employeeStore.isAuthenticated) {
+    return "/auth";
+  }
+  console.log(employeeStore.token, employeeStore.user);
+  return true;
 });
 
 export default router;
