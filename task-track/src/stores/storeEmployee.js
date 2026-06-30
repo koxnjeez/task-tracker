@@ -44,5 +44,15 @@ export const useStoreEmployee = defineStore("storeEmployee", {
       this.user = null;
       localStorage.removeItem("access_token");
     },
+    async updatePersonalInfo(statement) {
+      try {
+        const response = await api.patch("/auth/updateinfo", statement);
+        this.user = response.data;
+
+        return response.data;
+      } catch (error) {
+        console.error("Update personal info error:", error);
+      }
+    },
   },
 });

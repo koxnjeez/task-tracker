@@ -66,7 +66,35 @@ onUnmounted(() => {
 });
 
 // edited form saving
-const savePersonalDataForm = () => {};
+const savePersonalDataForm = async () => {
+  const changedFields = {};
+
+  if (firstName.value !== employeeStore.user.first_name) {
+    changedFields.first_name = firstName.value;
+  }
+  if (lastName.value !== employeeStore.user.last_name) {
+    changedFields.last_name = lastName.value;
+  }
+  if (middleName.value !== employeeStore.user.middle_name) {
+    changedFields.middle_name = middleName.value;
+  }
+  if (phoneNumber.value !== employeeStore.user.phone_number) {
+    changedFields.phone_number = phoneNumber.value;
+  }
+
+  if (Object.keys(changedFields).length === 0) {
+    emit("update:modelValue", false);
+    return;
+  }
+
+  try {
+    await employeeStore.updatePersonalInfo(changedFields);
+    emit("update:modelValue", false);
+  } catch (error) {
+    console.error("Update personal info error:", error);
+    alert("Something goes wrong while saving the data!");
+  }
+};
 </script>
 
 <style scoped>

@@ -1,5 +1,5 @@
 from database import Base
-from sqlalchemy import BigInteger, Boolean, Column, Date, SmallInteger, String, ForeignKey, DateTime, Text, func
+from sqlalchemy import BigInteger, Boolean, Date, SmallInteger, String, ForeignKey, DateTime, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime
 
@@ -7,6 +7,7 @@ class Projects(Base):
   __tablename__ = 'projects'
 
   id: Mapped[int] = mapped_column(BigInteger, primary_key=True, index=True)
+  is_private: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
   title: Mapped[str] = mapped_column(String(255))
 
 class Tasks(Base):
