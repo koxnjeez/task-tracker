@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import insert, or_, select
-from auth import get_current_employee
+from routers.auth import get_current_employee
 from starlette import status
 from sqlalchemy.orm import Session
 from database import get_db
@@ -31,10 +31,10 @@ async def read_all_projects(
   return employee_projects
 
 class ProjectRequest(BaseModel):
-  title: str
+  title: str = Field(min_length=1, max_length=255)
   is_private: bool = False
 
-@router.post('/project', status_code=status.HTTP_201_CREATED)
+@router.post('/new-project', status_code=status.HTTP_201_CREATED)
 async def create_project(
   data: ProjectRequest,
   session: Session = Depends(get_db),
@@ -48,15 +48,15 @@ async def create_project(
     session.add(new_project)
     session.flush() # для генерации id проекта, прокидываем запись но не коммитим
 
-    new_project_member_role = insert(ProjectMemberRoles).values(
+    new_project_member_role = ProjectMemberRoles(
       project_id=new_project.id,
       employee_id=employee.id,
       role_id=ADMIN_ROLE_ID
     )
-    session.execute(new_project_member_role)
-
+    session.add(new_project_member_role)
     session.commit()
-    session.refresh()
+
+    session.refresh(new_project)
     return new_project
   except Exception as error:
     session.rollback()

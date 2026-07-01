@@ -15,4 +15,19 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      const employeeStore = useStoreEmployee();
+
+      employeeStore.logout();
+
+      router.push("/auth");
+    }
+
+    return Promise.reject(error);
+  },
+);
+
 export default api;

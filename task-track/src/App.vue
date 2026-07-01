@@ -69,6 +69,12 @@ body {
     grid-template-areas: "main";
   }
 }
+.centering {
+  position: absolute;
+  left: 50%;
+  top: calc(50% - (1.75rem));
+  translate: -50% -50%;
+}
 .button {
   min-height: 3rem;
   min-width: 9rem;
@@ -97,5 +103,15 @@ body {
 }
 .button-dark:active {
   background: rgba(0, 0, 0, 0.2);
+}
+.modal-background {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 1;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
 }
 </style>
