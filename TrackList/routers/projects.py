@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
-from sqlalchemy import insert, or_, select
+from sqlalchemy import update, or_, select
 from routers.auth import get_current_employee
 from starlette import status
 from sqlalchemy.orm import Session
@@ -8,7 +8,7 @@ from database import get_db
 from models import Employees, Projects, ProjectMemberRoles
 
 router = APIRouter(prefix="/projects", tags=["projects"])
-ADMIN_ROLE_ID = 0
+ADMIN_ROLE_ID = 1
 
 @router.get('/', status_code=status.HTTP_200_OK)
 async def read_all_projects(
@@ -34,7 +34,7 @@ class ProjectRequest(BaseModel):
   title: str = Field(min_length=1, max_length=255)
   is_private: bool = False
 
-@router.post('/new-project', status_code=status.HTTP_201_CREATED)
+@router.post('/newproject', status_code=status.HTTP_201_CREATED)
 async def create_project(
   data: ProjectRequest,
   session: Session = Depends(get_db),
@@ -64,3 +64,53 @@ async def create_project(
       status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
       detail=f'Failed to create the project: {error}'
     )
+
+class ProjectUpdateRequest(BaseModel):
+  id: int
+  title: str = Field(min_length=1, max_length=255)
+  is_private: bool = False
+
+@router.patch('/editproject', status_code=status.HTTP_200_OK)
+async def edit_project_info(
+  data: ProjectUpdateRequest,
+  session: Session = Depends(get_db),
+  employee: Employees = Depends(get_current_employee)
+):
+  project = session.get(Projects, data.id)
+  if not project:
+    raise HTTPException(
+      status_code=status.HTTP_404_NOT_FOUND,
+      detail='Project not found'
+    )
+
+  is_admin = session.scalar(
+    select(ProjectMemberRoles)
+    .where(
+      ProjectMemberRoles.project_id == data.id,
+      ProjectMemberRoles.employee_id == employee.id,
+      ProjectMemberRoles.role_id == ADMIN_ROLE_ID
+    )
+  )
+  if not is_admin:
+    raise HTTPException(
+      status_code=status.HTTP_403_FORBIDDEN,
+      detail='You dont have permission to edit current project'
+    )
+
+  update_dict = data.model_dump(exclude_unset=True)
+  update_dict.pop('id', None)
+
+  if update_dict:
+    try:
+      for key, value in update_dict.items():
+        setattr(project, key, value) # в отличии от прямого запроса, работа с живым объектом и потом уже идет синхронизация с бд
+      session.commit()
+      session.refresh(project)
+    except Exception as error:
+      session.rollback()
+      raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail=f'Failed project info update: {error}'
+      )
+
+  return project
