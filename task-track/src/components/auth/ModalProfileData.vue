@@ -99,19 +99,9 @@ const savePersonalDataForm = async () => {
 
 <style scoped>
 dialog {
-  position: fixed;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  color: white;
-  border: none;
   width: 20%;
   max-width: 20rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(27, 27, 27, 0.3);
+  min-width: 16.5rem;
 }
 .edit-data-title {
   font-weight: 700;

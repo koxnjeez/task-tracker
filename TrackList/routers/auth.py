@@ -111,7 +111,7 @@ class ProfileUpdate(BaseModel):
     phone_number: str = None
 
 @router.patch('/updateinfo', status_code=status.HTTP_200_OK)
-async def update_personal_info(
+def update_personal_info(
     data: ProfileUpdate,
     session: Session = Depends(get_db),
     employee: Employees = Depends(get_current_employee)
@@ -130,3 +130,17 @@ async def update_personal_info(
     session.refresh(employee)
 
   return employee
+
+@router.get('/allemployees', status_code=status.HTTP_200_OK)
+def get_all_employees(
+  session: Session = Depends(get_db),
+  employee: Employees = Depends(get_current_employee)
+):
+  statement = (
+    select(Employees)
+    .where(Employees.id != employee.id)
+    .order_by(Employees.last_name.asc())
+  )
+
+  all_employees = session.scalars(statement).all()
+  return all_employees

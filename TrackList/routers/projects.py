@@ -1,17 +1,18 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
-from sqlalchemy import update, or_, select
+from sqlalchemy import or_, select
 from routers.auth import get_current_employee
 from starlette import status
 from sqlalchemy.orm import Session
 from database import get_db
-from models import Employees, Projects, ProjectMemberRoles
+from models import Employees, Projects, ProjectMemberRoles, Roles
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 ADMIN_ROLE_ID = 1
 
 @router.get('/', status_code=status.HTTP_200_OK)
-async def read_all_projects(
+def read_all_projects(
   session: Session = Depends(get_db),
   employee: Employees = Depends(get_current_employee)
 ):
@@ -35,7 +36,7 @@ class ProjectRequest(BaseModel):
   is_private: bool = False
 
 @router.post('/newproject', status_code=status.HTTP_201_CREATED)
-async def create_project(
+def create_project(
   data: ProjectRequest,
   session: Session = Depends(get_db),
   employee: Employees = Depends(get_current_employee)
@@ -67,11 +68,11 @@ async def create_project(
 
 class ProjectUpdateRequest(BaseModel):
   id: int
-  title: str = Field(min_length=1, max_length=255)
-  is_private: bool = False
+  title: Optional[str] = Field(default=None, min_length=1, max_length=255)
+  is_private: Optional[bool] = None
 
 @router.patch('/editproject', status_code=status.HTTP_200_OK)
-async def edit_project_info(
+def edit_project_info(
   data: ProjectUpdateRequest,
   session: Session = Depends(get_db),
   employee: Employees = Depends(get_current_employee)
@@ -114,3 +115,15 @@ async def edit_project_info(
       )
 
   return project
+
+@router.get('/roles', status_code=status.HTTP_200_OK)
+def get_all_roles(
+  session: Session = Depends(get_db)
+):
+  statement = (
+    select(Roles)
+    .order_by(Roles.id.asc())
+  )
+
+  all_roles = session.scalars(statement).all()
+  return all_roles

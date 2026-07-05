@@ -4,7 +4,7 @@
     <router-link to="/auth">Sign in</router-link>
   </div>
   <div class="projects" v-else>
-    <button class="button" @click="projectAdding = true">Add project</button>
+    <button class="button" @click="openCreateModal">Add project</button>
     <div class="headers-section">
       <div class="id-header">INDEX</div>
       <div class="title-header">TITLE</div>
@@ -15,10 +15,15 @@
         v-for="project in projectsStore.projects"
         :key="project.id"
         :project="project"
+        @updateProject="openEditModal(project)"
       ></project>
     </ul>
   </div>
-  <modal-project v-if="projectAdding" v-model="projectAdding"></modal-project>
+  <modal-project
+    v-if="openModal"
+    v-model="openModal"
+    :editingProject="selectedProject"
+  ></modal-project>
 </template>
 
 <script setup>
@@ -30,12 +35,22 @@ import { ref, onMounted } from "vue";
 
 const employeeStore = useStoreEmployee();
 const projectsStore = useStoreProjects();
-const projectAdding = ref(false);
+const openModal = ref(false);
+const selectedProject = ref(null);
 
 onMounted(async () => {
   await projectsStore.fetchProjects();
-  console.log(projectsStore.projects);
 });
+
+const openCreateModal = () => {
+  selectedProject.value = null;
+  openModal.value = true;
+};
+
+const openEditModal = (project) => {
+  selectedProject.value = project;
+  openModal.value = true;
+};
 </script>
 
 <style scoped>
@@ -66,10 +81,10 @@ onMounted(async () => {
   width: 10%;
 }
 .title-header {
-  width: 80%;
+  width: 75%;
 }
 .privacy-header {
-  width: 10%;
+  width: 15%;
 }
 ul {
   padding: 0;

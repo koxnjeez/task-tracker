@@ -5,7 +5,9 @@ export const useStoreProjects = defineStore("storeProjects", {
   state: () => {
     return {
       projects: [],
-      isLoaded: false,
+      projectsLoaded: false,
+      roles: [],
+      rolesLoaded: false,
     };
   },
   actions: {
@@ -21,7 +23,7 @@ export const useStoreProjects = defineStore("storeProjects", {
     },
     async updateProjectInfo(statement) {
       try {
-        const response = api.patch("/projects/editproject", statement);
+        const response = await api.patch("/projects/editproject", statement);
         const updatedProject = response.data;
 
         const index = this.projects.findIndex(
@@ -37,20 +39,33 @@ export const useStoreProjects = defineStore("storeProjects", {
       }
     },
     async fetchProjects() {
-      if (this.isLoaded) return;
+      if (this.projectsLoaded) return;
 
       try {
         const response = await api.get("/projects");
         this.projects = response.data;
-        this.isLoaded = true;
+        this.projectsLoaded = true;
       } catch (error) {
         console.error("Failed to fatch available projects:", error);
         throw error;
       }
     },
+    async getAllRoles() {
+      if (this.rolesLoaded) return;
+
+      try {
+        const response = await api.get("/projects/roles");
+        this.roles = response.data;
+        this.rolesLoaded = true;
+      } catch (error) {
+        console.error("Failed loading employee roles:", error);
+      }
+    },
     clearProjects() {
       this.projects = [];
-      this.isLoaded = false;
+      this.projectsLoaded = false;
+      this.roles = [];
+      this.rolesLoaded = false;
     },
   },
 });

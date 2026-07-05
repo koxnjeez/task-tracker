@@ -7,6 +7,8 @@ export const useStoreEmployee = defineStore("storeEmployee", {
     return {
       user: null,
       token: localStorage.getItem("access_token") || null,
+      otherEmployees: [],
+      employeesLoaded: false,
     };
   },
   getters: {
@@ -44,6 +46,8 @@ export const useStoreEmployee = defineStore("storeEmployee", {
       try {
         this.token = null;
         this.user = null;
+        this.otherEmployees = [];
+        this.employeesLoaded = false;
         localStorage.removeItem("access_token");
 
         const projectsStore = useStoreProjects();
@@ -60,6 +64,17 @@ export const useStoreEmployee = defineStore("storeEmployee", {
         return response.data;
       } catch (error) {
         console.error("Update personal info error:", error);
+      }
+    },
+    async getAllEmployees() {
+      try {
+        const response = await api.get("/auth/allemployees");
+        this.otherEmployees = response.data;
+
+        this.employeesLoaded = true;
+        return this.otherEmployees;
+      } catch (error) {
+        console.error("Failed loading the rest employees:", error);
       }
     },
   },

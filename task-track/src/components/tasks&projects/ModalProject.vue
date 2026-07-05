@@ -2,8 +2,8 @@
   <teleport to="body">
     <div class="modal-background" @click="closeModal"></div>
     <dialog open>
-      <section class="add_project_title">Add new project</section>
-      <form @submit.prevent="createNewProject" class="add_project_form">
+      <section class="project_title">Customize your project</section>
+      <form @submit.prevent="saveProject" class="project_form">
         <label for="project_title">Project title</label>
         <input
           type="text"
@@ -38,6 +38,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  editingProject: {
+    type: Object,
+    default: null,
+  },
 });
 
 // emits
@@ -59,6 +63,11 @@ const handleKeybord = (e) => {
 
 // load when mount
 onMounted(() => {
+  if (props.editingProject) {
+    projectTitle.value = props.editingProject.title || "";
+    projectPrivacy.value = props.editingProject.is_private || false;
+  }
+
   document.addEventListener("keyup", handleKeybord);
 
   setTimeout(() => {
@@ -73,7 +82,7 @@ onUnmounted(() => {
 });
 
 // creating with entered data
-const createNewProject = async () => {
+const saveProject = async () => {
   projectTitle.value = projectTitle.value.trim();
 
   if (projectTitle.value.length === 0) {
@@ -84,48 +93,56 @@ const createNewProject = async () => {
     return;
   }
 
-  const statement = {
-    title: projectTitle.value,
-    is_private: projectPrivacy.value,
-  };
+  if (props.editingProject) {
+    const statement = {
+      id: props.editingProject.id,
+    };
+    if (projectTitle.value !== props.editingProject.title) {
+      statement.title = projectTitle.value;
+    }
+    if (projectPrivacy.value !== props.editingProject.is_private) {
+      statement.is_private = projectPrivacy.value;
+    }
 
-  try {
-    await projectsStore.createNewProject(statement);
-    closeModal();
-  } catch (error) {
-    console.error("Project creating error:", error);
-    alert("Something goes wrong while creating the project!");
+    try {
+      await projectsStore.updateProjectInfo(statement);
+      closeModal();
+    } catch (error) {
+      console.error("Project updating error:", error);
+      alert("Something goes wrong while updating the project!");
+    }
+  } else {
+    const statement = {
+      title: projectTitle.value,
+      is_private: projectPrivacy.value,
+    };
+
+    try {
+      await projectsStore.createNewProject(statement);
+      closeModal();
+    } catch (error) {
+      console.error("Project creating error:", error);
+      alert("Something goes wrong while creating the project!");
+    }
   }
 };
 </script>
 
 <style scoped>
 dialog {
-  position: fixed;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  color: white;
-  border: none;
   width: 70%;
   /* max-width: 20rem; */
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(27, 27, 27, 0.3);
 }
-.add_project_title {
+.project_title {
   justify-self: center;
   font-weight: 700;
   margin-bottom: 1.5rem;
 }
-.add_project_form {
+.project_form {
   display: flex;
   flex-direction: column;
 }
-[type="text"],
-.switch {
+[type="text"] {
   margin: 0.25rem 0 1rem 0;
   height: 1.8rem;
   outline: none;
@@ -143,41 +160,6 @@ dialog {
   border-radius: 5px;
 }
 .switch {
-  position: relative;
-  display: inline-block;
-  width: 3.6rem;
-}
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 34px;
-  transition: 0.3s;
-}
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 1.3rem;
-  width: 1.3rem;
-  left: 0.25rem;
-  bottom: 0.25rem;
-  background: rgba(255, 255, 255, 0.6);
-  transition: 0.3s;
-  border-radius: 50%;
-}
-input:checked + .slider {
-  background: rgba(255, 95, 30, 0.6);
-}
-input:checked + .slider:before {
-  transform: translateX(1.8rem);
+  margin: 0.25rem 0 1rem 0;
 }
 </style>
