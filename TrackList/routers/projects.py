@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
-from sqlalchemy import or_, select
+from sqlalchemy import delete, or_, select
 from routers.auth import get_current_employee
 from starlette import status
 from sqlalchemy.orm import Session
@@ -127,3 +127,32 @@ def get_all_roles(
 
   all_roles = session.scalars(statement).all()
   return all_roles
+
+@router.get('/{project_id}/members', status_code=status.HTTP_200_OK)
+def get_active_project_roles(project_id: int, session: Session = Depends(get_db)):
+  statement = select(ProjectMemberRoles).where(ProjectMemberRoles.project_id == project_id)
+  return session.scalars(statement).all()
+
+class ProjectMemeberRoleRequest(BaseModel):
+  employee_id: int
+  role_id: int
+
+@router.post('/{project_id}/members', status_code=status.HTTP_200_OK)
+def refresh_active_project_roles(
+  project_id: int,
+  payload: List[ProjectMemeberRoleRequest],
+  session: Session = Depends(get_db)
+):
+  statement = delete(ProjectMemberRoles).where(ProjectMemberRoles.project_id == project_id)
+  session.execute(statement)
+
+  for role in payload:
+    refreshed_role = ProjectMemberRoles(
+      project_id=project_id,
+      employee_id=role.employee_id,
+      role_id=role.role_id
+    )
+    session.add(refreshed_role)
+
+  session.commit()
+  return

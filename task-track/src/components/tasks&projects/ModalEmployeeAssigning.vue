@@ -1,11 +1,8 @@
 <template>
   <teleport to="body">
-    <div
-      class="modal-background"
-      @click="$emit('update:modelValue', false)"
-    ></div>
+    <div class="modal-background" @click="closeModal"></div>
     <dialog open>
-      <div class="asssigning-container">
+      <div class="assigning-container">
         <div class="employees-container">
           <ul class="employees-list">
             <li
@@ -20,20 +17,33 @@
             </li>
           </ul>
         </div>
-        <div class="roles-container"></div>
+        <div class="roles-container">
+          <div class="role" v-for="role in projectsStore.roles" :key="role.id">
+            <label class="switch">
+              <input type="checkbox" />
+              <span class="slider"></span>
+            </label>
+            <label class="role-title">{{ role.name }}</label>
+          </div>
+        </div>
       </div>
     </dialog>
   </teleport>
 </template>
 
 <script setup>
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
+import { useRoute } from "vue-router";
 import { useStoreEmployee } from "@/stores/storeEmployee";
 import { useStoreProjects } from "@/stores/storeProjects";
+import api from "@/api/api";
 
 // data
 const employeeStore = useStoreEmployee();
 const projectsStore = useStoreProjects();
+const route = useRoute();
+const selectedRolesMap = ref({});
+const selectedEmployeeId = ref(null);
 
 // props
 const props = defineProps({
@@ -49,8 +59,15 @@ const emit = defineEmits(["update:modelValue"]);
 // alternative close
 const handleKeybord = (e) => {
   if (e.key === "Escape") {
-    emit("update:modelValue", false);
+    closeModal();
   }
+};
+
+// modal close
+const closeModal = () => {
+  selectedRolesMap.value = {};
+  selectedEmployeeId.value = null;
+  emit("update:modelValue", false);
 };
 
 // load when mount
@@ -61,13 +78,56 @@ onMounted(async () => {
     await employeeStore.getAllEmployees();
   }
   await projectsStore.getAllRoles();
-  console.log(employeeStore.otherEmployees);
-  console.log(projectsStore.roles);
+
+  employeeStore.otherEmployees.forEach((employee) => {
+    selectedRolesMap.value[employee.id] = [];
+  });
+
+  try {
+    const response = await api.get(
+      `/projects/${parseInt(route.params.id)}/members`,
+    );
+    const activeMembers = response.data;
+
+    activeMembers.forEach((member) => {
+      if (selectedRolesMap.value[member.employee_id]) {
+        selectedRolesMap.value[member.employee_id].push(member.role_id);
+      }
+    });
+  } catch (error) {
+    console.error("Failed to load project members data:", error);
+  }
+
+  if (employeeStore.otherEmployees.length > 0) {
+    selectedEmployeeId.value = employeeStore.otherEmployees.id;
+  }
 });
 
 onUnmounted(() => {
   document.removeEventListener("keyup", handleKeybord);
 });
+
+const refreshProjectRoles = async () => {
+  const payload = [];
+
+  Object.keys(selectedRolesMap.value).forEach((employeeId) => {
+    const activeRoles = selectedRolesMap.value[employeeId];
+
+    activeRoles.forEach((roleId) => {
+      payload.push({
+        employee_id: parseInt(employeeId),
+        role_id: roleId,
+      });
+    });
+  });
+
+  try {
+    await api.post(`/projects/${parseInt(route.params.id)}/members`);
+    alert("Roles saved successfully!");
+  } catch (error) {
+    console.error("Failed saving roles settings");
+  }
+};
 </script>
 
 <style scoped>
@@ -101,5 +161,19 @@ dialog {
 }
 .employee-item:last-child {
   margin-bottom: 0;
+}
+.roles-container {
+  height: fit-content;
+  width: 40%;
+  padding: 0.5rem 1rem;
+}
+.role {
+  display: flex;
+  margin-bottom: 1rem;
+}
+.role-title {
+  text-transform: capitalize;
+  align-content: center;
+  margin-left: 0.5rem;
 }
 </style>
