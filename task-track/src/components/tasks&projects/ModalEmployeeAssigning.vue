@@ -9,6 +9,11 @@
               v-for="employee in employeeStore.otherEmployees"
               :key="employee.id"
               class="employee-item"
+              :class="{
+                'selected-employee': employee.id == selectedEmployeeId,
+                'project-member': selectedRolesMap[employee.id]?.length > 0,
+              }"
+              @click="selectedEmployeeId = employee.id"
             >
               {{ employee.last_name }}
               {{ employee.first_name }}
@@ -17,14 +22,24 @@
             </li>
           </ul>
         </div>
-        <div class="roles-container">
+        <div
+          class="roles-container"
+          v-if="selectedEmployeeId && selectedRolesMap[selectedEmployeeId]"
+        >
           <div class="role" v-for="role in projectsStore.roles" :key="role.id">
             <label class="switch">
-              <input type="checkbox" />
+              <input
+                type="checkbox"
+                :value="role.id"
+                v-model="selectedRolesMap[selectedEmployeeId]"
+              />
               <span class="slider"></span>
             </label>
             <label class="role-title">{{ role.name }}</label>
           </div>
+          <button class="button button-dark" @click="refreshProjectRoles">
+            Save changes
+          </button>
         </div>
       </div>
     </dialog>
@@ -32,7 +47,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from "vue";
+import { onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useStoreEmployee } from "@/stores/storeEmployee";
 import { useStoreProjects } from "@/stores/storeProjects";
@@ -55,6 +70,17 @@ const props = defineProps({
 
 // emits
 const emit = defineEmits(["update:modelValue"]);
+
+// watch
+watch(
+  () => employeeStore.otherEmployees,
+  (newEmployees) => {
+    if (newEmployees.length > 0 && !selectedEmployeeId.value) {
+      selectedEmployeeId.value = newEmployees[0].id;
+    }
+  },
+  { immediate: true },
+);
 
 // alternative close
 const handleKeybord = (e) => {
@@ -97,10 +123,6 @@ onMounted(async () => {
   } catch (error) {
     console.error("Failed to load project members data:", error);
   }
-
-  if (employeeStore.otherEmployees.length > 0) {
-    selectedEmployeeId.value = employeeStore.otherEmployees.id;
-  }
 });
 
 onUnmounted(() => {
@@ -121,11 +143,14 @@ const refreshProjectRoles = async () => {
     });
   });
 
+  console.log("Sends on backend:", JSON.stringify(payload));
+
   try {
-    await api.post(`/projects/${parseInt(route.params.id)}/members`);
+    await api.post(`/projects/${parseInt(route.params.id)}/members`, payload);
     alert("Roles saved successfully!");
+    closeModal();
   } catch (error) {
-    console.error("Failed saving roles settings");
+    console.error("Failed saving roles settings:", error);
   }
 };
 </script>
@@ -152,20 +177,28 @@ dialog {
 }
 .employee-item {
   list-style: none;
+  box-sizing: content-box;
   background: rgba(0, 0, 0, 0.6);
   margin-bottom: 0.3rem;
   padding: 0.5rem 0.7rem;
   border-radius: 10px;
-  border: none;
+  border: 3px solid transparent;
   box-shadow: 0 4px 8px rgba(27, 27, 27, 0.3);
+}
+.project-member {
+  border: 3px solid rgba(255, 255, 255, 0.6);
+}
+.selected-employee {
+  border: 3px solid rgba(255, 95, 30, 0.6);
 }
 .employee-item:last-child {
   margin-bottom: 0;
 }
 .roles-container {
-  height: fit-content;
+  display: flex;
+  flex-direction: column;
   width: 40%;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0 0 1rem;
 }
 .role {
   display: flex;
@@ -175,5 +208,8 @@ dialog {
   text-transform: capitalize;
   align-content: center;
   margin-left: 0.5rem;
+}
+.button {
+  margin-top: auto;
 }
 </style>

@@ -1,7 +1,7 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
-from sqlalchemy import delete, or_, select
+from sqlalchemy import delete, or_, and_, select
 from routers.auth import get_current_employee
 from starlette import status
 from sqlalchemy.orm import Session
@@ -141,9 +141,15 @@ class ProjectMemeberRoleRequest(BaseModel):
 def refresh_active_project_roles(
   project_id: int,
   payload: List[ProjectMemeberRoleRequest],
-  session: Session = Depends(get_db)
+  session: Session = Depends(get_db),
+  employee: Employees = Depends(get_current_employee)
 ):
-  statement = delete(ProjectMemberRoles).where(ProjectMemberRoles.project_id == project_id)
+  statement = (
+    delete(ProjectMemberRoles)
+    .where(
+      and_(ProjectMemberRoles.project_id == project_id, ProjectMemberRoles.employee_id != employee.id)
+    )
+  )
   session.execute(statement)
 
   for role in payload:
