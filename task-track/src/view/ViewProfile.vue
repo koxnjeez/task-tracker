@@ -1,5 +1,5 @@
 <template>
-  <div class="profile-container">
+  <div class="profile-container centering">
     <div class="profile-title">Personal info</div>
     <ul>
       <li>
@@ -54,10 +54,6 @@ const dataEditing = ref(false);
   backdrop-filter: blur(20px);
   padding: 1rem;
   border-radius: 10px;
-  position: absolute;
-  left: 50%;
-  top: calc(50% - (1.75rem));
-  transform: translate(-50%, -50%);
 }
 ul {
   padding: 0;

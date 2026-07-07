@@ -9,7 +9,6 @@ from database import get_db
 from models import Employees
 from starlette import status
 
-
 router = APIRouter(prefix="/auth", tags=["auth"])
 security = HTTPBearer()
 
@@ -111,10 +110,10 @@ class ProfileUpdate(BaseModel):
     middle_name: str = None
     phone_number: str = None
 
-@router.patch('/updateinfo', status_code=status.HTTP_204_NO_CONTENT)
-async def update_personal_info(
+@router.patch('/updateinfo', status_code=status.HTTP_200_OK)
+def update_personal_info(
     data: ProfileUpdate,
-    db: Session = Depends(get_db),
+    session: Session = Depends(get_db),
     employee: Employees = Depends(get_current_employee)
 ):
   update_dict = data.model_dump(exclude_unset=True)
@@ -125,9 +124,23 @@ async def update_personal_info(
         .where(Employees.id == employee.id)
         .values(update_dict)
     )
-  db.execute(statement)
+    session.execute(statement)
 
-  db.commit()
-  db.refresh(employee)
+    session.commit()
+    session.refresh(employee)
 
   return employee
+
+@router.get('/allemployees', status_code=status.HTTP_200_OK)
+def get_all_employees(
+  session: Session = Depends(get_db),
+  employee: Employees = Depends(get_current_employee)
+):
+  statement = (
+    select(Employees)
+    .where(Employees.id != employee.id)
+    .order_by(Employees.last_name.asc())
+  )
+
+  all_employees = session.scalars(statement).all()
+  return all_employees

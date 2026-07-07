@@ -66,34 +66,42 @@ onUnmounted(() => {
 });
 
 // edited form saving
-const savePersonalDataForm = () => {};
+const savePersonalDataForm = async () => {
+  const changedFields = {};
+
+  if (firstName.value !== employeeStore.user.first_name) {
+    changedFields.first_name = firstName.value;
+  }
+  if (lastName.value !== employeeStore.user.last_name) {
+    changedFields.last_name = lastName.value;
+  }
+  if (middleName.value !== employeeStore.user.middle_name) {
+    changedFields.middle_name = middleName.value;
+  }
+  if (phoneNumber.value !== employeeStore.user.phone_number) {
+    changedFields.phone_number = phoneNumber.value;
+  }
+
+  if (Object.keys(changedFields).length === 0) {
+    emit("update:modelValue", false);
+    return;
+  }
+
+  try {
+    await employeeStore.updatePersonalInfo(changedFields);
+    emit("update:modelValue", false);
+  } catch (error) {
+    console.error("Update personal info error:", error);
+    alert("Something goes wrong while saving the data!");
+  }
+};
 </script>
 
 <style scoped>
-.modal-background {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100vh;
-  z-index: 1;
-  background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(2px);
-}
 dialog {
-  position: fixed;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  color: white;
-  border: none;
   width: 20%;
   max-width: 20rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(27, 27, 27, 0.3);
+  min-width: 16.5rem;
 }
 .edit-data-title {
   font-weight: 700;

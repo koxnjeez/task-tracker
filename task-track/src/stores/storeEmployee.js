@@ -1,11 +1,14 @@
 import { defineStore } from "pinia";
 import api from "@/api/api";
+import { useStoreProjects } from "./storeProjects";
 
 export const useStoreEmployee = defineStore("storeEmployee", {
   state: () => {
     return {
       user: null,
       token: localStorage.getItem("access_token") || null,
+      otherEmployees: [],
+      employeesLoaded: false,
     };
   },
   getters: {
@@ -35,14 +38,44 @@ export const useStoreEmployee = defineStore("storeEmployee", {
         const response = await api.get("/auth/me");
         this.user = response.data;
       } catch (error) {
-        console.error("Failed to fetch:", error);
+        console.error("Failed to fetch a user:", error);
         this.logout();
       }
     },
     logout() {
-      this.token = null;
-      this.user = null;
-      localStorage.removeItem("access_token");
+      try {
+        this.token = null;
+        this.user = null;
+        this.otherEmployees = [];
+        this.employeesLoaded = false;
+        localStorage.removeItem("access_token");
+
+        const projectsStore = useStoreProjects();
+        projectsStore.clearProjects();
+      } catch (error) {
+        console.error("Logout error:", error);
+      }
+    },
+    async updatePersonalInfo(statement) {
+      try {
+        const response = await api.patch("/auth/updateinfo", statement);
+        this.user = response.data;
+
+        return response.data;
+      } catch (error) {
+        console.error("Update personal info error:", error);
+      }
+    },
+    async getAllEmployees() {
+      try {
+        const response = await api.get("/auth/allemployees");
+        this.otherEmployees = response.data;
+
+        this.employeesLoaded = true;
+        return this.otherEmployees;
+      } catch (error) {
+        console.error("Failed loading the rest employees:", error);
+      }
     },
   },
 });

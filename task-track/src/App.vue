@@ -69,10 +69,16 @@ body {
     grid-template-areas: "main";
   }
 }
+.centering {
+  position: absolute;
+  left: 50%;
+  top: calc(50% - (1.75rem));
+  translate: -50% -50%;
+}
 .button {
   min-height: 3rem;
   min-width: 9rem;
-  padding: 0;
+  padding: 0 1rem;
   border-radius: 16px;
   border: none;
   font-family: inherit;
@@ -82,6 +88,7 @@ body {
   color: white;
   box-shadow: 0 4px 8px rgba(27, 27, 27, 0.3);
   backdrop-filter: blur(16px);
+  outline: none;
 }
 .button:hover {
   background: rgba(255, 255, 255, 0.32);
@@ -97,5 +104,69 @@ body {
 }
 .button-dark:active {
   background: rgba(0, 0, 0, 0.2);
+}
+.modal-background {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 1;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+}
+dialog {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(27, 27, 27, 0.3);
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  height: 1.8rem;
+  width: 3.6rem;
+  outline: none;
+  border: none;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 34px;
+  transition: 0.3s;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 1.3rem;
+  width: 1.3rem;
+  left: 0.25rem;
+  bottom: 0.25rem;
+  background: rgba(255, 255, 255, 0.6);
+  transition: 0.3s;
+  border-radius: 50%;
+}
+input:checked + .slider {
+  background: rgba(255, 95, 30, 0.6);
+}
+input:checked + .slider:before {
+  transform: translateX(1.8rem);
 }
 </style>
