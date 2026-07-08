@@ -59,6 +59,7 @@ const projectsStore = useStoreProjects();
 const route = useRoute();
 const selectedRolesMap = ref({});
 const selectedEmployeeId = ref(null);
+const projectId = parseInt(route.params.id);
 
 // props
 const props = defineProps({
@@ -110,9 +111,7 @@ onMounted(async () => {
   });
 
   try {
-    const response = await api.get(
-      `/projects/${parseInt(route.params.id)}/members`,
-    );
+    const response = await api.get(`/projects/${projectId}/members`);
     const activeMembers = response.data;
 
     activeMembers.forEach((member) => {
@@ -146,7 +145,7 @@ const refreshProjectRoles = async () => {
   console.log("Sends on backend:", JSON.stringify(payload));
 
   try {
-    await api.post(`/projects/${parseInt(route.params.id)}/members`, payload);
+    await api.post(`/projects/${projectId}/members`, payload);
     alert("Roles saved successfully!");
     closeModal();
   } catch (error) {

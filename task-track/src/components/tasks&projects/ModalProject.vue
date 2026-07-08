@@ -144,20 +144,6 @@ dialog {
 }
 [type="text"] {
   margin: 0.25rem 0 1rem 0;
-  height: 1.8rem;
-  outline: none;
-  border: none;
-}
-[type="text"] {
-  padding-left: 0.5rem;
-  background: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 4px 8px rgba(27, 27, 27, 0.3);
-  color: black;
-  backdrop-filter: blur(16px);
-  font-family: inherit;
-  font-size: 16px;
-  font-weight: 500;
-  border-radius: 5px;
 }
 .switch {
   margin: 0.25rem 0 1rem 0;
