@@ -1,13 +1,28 @@
 <template>
   <div class="project-container">
+    <h1>{{ projectTitle }}</h1>
     <div class="buttons-container">
       <button class="button" @click="openCreateModal">Add new task</button>
       <button class="button" @click="assignManagement = true">
         Employee Assignment Management
       </button>
     </div>
+    <div class="headers-section">
+      <div class="id-header">ID</div>
+      <div class="title-header">TITLE</div>
+      <div class="description-header">DESCRIPTION</div>
+      <div class="status-header">STATUS</div>
+      <div class="date-header">START DATE</div>
+      <div class="date-header">END DATE</div>
+      <div class="pull-request-header">PULL REQUEST</div>
+    </div>
     <ul>
-      <task v-for="task in tasksStore.tasks" :key="task.id"></task>
+      <task
+        v-for="task in tasksStore.tasks"
+        :key="task.id"
+        :task="task"
+        @click="openEditModal(task)"
+      ></task>
     </ul>
   </div>
   <modal-task
@@ -26,20 +41,25 @@ import ModalTask from "@/components/tasks&projects/ModalTask.vue";
 import ModalEmployeeAssigning from "@/components/tasks&projects/ModalEmployeeAssigning.vue";
 import Task from "@/components/tasks&projects/Task.vue";
 import { useStoreTasks } from "@/stores/storeTasks";
-import { ref, onMounted } from "vue";
+import { useStoreProjects } from "@/stores/storeProjects";
+import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 
+// data
 const route = useRoute();
 const tasksStore = useStoreTasks();
+const projectsStore = useStoreProjects();
 const assignManagement = ref(false);
 const openModal = ref(false);
 const selectedTask = ref(null);
 const projectId = parseInt(route.params.id);
 
+// load when mount
 onMounted(async () => {
   await tasksStore.fetchTasks(projectId);
 });
 
+// modal variaties
 const openCreateModal = () => {
   selectedTask.value = null;
   openModal.value = true;
@@ -48,6 +68,12 @@ const openEditModal = (task) => {
   selectedTask.value = task;
   openModal.value = true;
 };
+
+// computed
+const projectTitle = computed(() => {
+  return projectsStore.projects.find((project) => project.id === projectId)
+    .title;
+});
 </script>
 
 <style scoped>
@@ -57,6 +83,41 @@ const openEditModal = (task) => {
 }
 .button {
   width: 50%;
-  margin-top: 1.5rem;
+}
+ul {
+  margin: 0;
+  padding: 0;
+}
+h1 {
+  margin: 0;
+  padding: 2rem;
+  justify-self: center;
+  font-size: 40px;
+  font-weight: 900;
+}
+.headers-section {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.7);
+}
+.id-header {
+  width: 3%;
+}
+.title-header {
+  width: 20%;
+}
+.description-header {
+  width: 30%;
+}
+.status-header {
+  width: 12%;
+}
+.date-header {
+  width: 10%;
+}
+.pull-request-header {
+  width: 15%;
 }
 </style>

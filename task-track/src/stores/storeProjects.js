@@ -27,7 +27,7 @@ export const useStoreProjects = defineStore("storeProjects", {
         const updatedProject = response.data;
 
         const index = this.projects.findIndex(
-          (p) => p.id === updatedProject.id,
+          (project) => project.id === updatedProject.id,
         );
         if (index !== -1) {
           this.projects[index] = updatedProject;

@@ -51,11 +51,13 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from "vue";
+import { nextTick, onMounted, onUnmounted, ref } from "vue";
 import { useStoreTasks } from "@/stores/storeTasks";
+import { useRoute } from "vue-router";
 
 // data
 const tasksStore = useStoreTasks();
+const route = useRoute();
 const titleInputFieldRef = ref(null);
 const today = new Date().toISOString().split("T")[0];
 const form = ref({
@@ -68,6 +70,7 @@ const form = ref({
 });
 const titleValidationError = ref(false);
 const endDateValidationError = ref(false);
+const projectId = parseInt(route.params.id);
 
 // props
 const props = defineProps({
@@ -98,7 +101,7 @@ const handleKeybord = (e) => {
 };
 
 // load when mount
-onMounted(() => {
+onMounted(async () => {
   if (props.editingTask) {
     form.value.title = props.editingTask.title;
     form.value.description = props.editingTask.description || "";
@@ -110,18 +113,20 @@ onMounted(() => {
 
   document.addEventListener("keyup", handleKeybord);
 
-  setTimeout(() => {
+  if (props.editingTask === null) {
+    await nextTick();
+
     if (titleInputFieldRef.value) {
       titleInputFieldRef.value.focus();
     }
-  }, 50);
+  }
 });
 
 onUnmounted(() => {
   document.removeEventListener("keyup", handleKeybord);
 });
 
-// creating with entered data
+// creating and updating with entered data
 const saveTask = async () => {
   form.value.title = form.value.title.trim();
   form.value.description = form.value.description.trim();
@@ -136,21 +141,50 @@ const saveTask = async () => {
     return;
   }
 
-  const statement = {
-    title: form.value.title,
-    description: form.value.description || null,
-    status: form.value.status,
-    start_date: null,
-    end_date: form.value.endDate || null,
-    pull_request: form.value.pullRequest || null,
-  };
+  if (props.editingTask) {
+    const statement = {
+      id: props.editingTask.id,
+    };
+    if (form.value.title !== props.editingTask.title) {
+      statement.title = form.value.title;
+    }
+    if (form.value.description !== props.editingTask.description) {
+      statement.description = form.value.description;
+    }
+    if (form.value.status !== props.editingTask.status) {
+      statement.status = form.value.status;
+    }
+    if (form.value.endDate !== props.editingTask.end_date) {
+      statement.end_date = form.value.endDate;
+    }
+    if (form.value.pullRequest !== props.editingTask.pull_request) {
+      statement.pull_request = form.value.pullRequest;
+    }
 
-  try {
-    // await ;
-    closeModal();
-  } catch (error) {
-    console.error("Task creating error:", error);
-    alert("Something goes wrong while creating the task!");
+    try {
+      await tasksStore.updateTaskInfo(projectId, statement);
+      closeModal();
+    } catch (error) {
+      console.error("Task updating error:", error);
+      alert("Something goes wrong while updating the task!");
+    }
+  } else {
+    const statement = {
+      title: form.value.title,
+      description: form.value.description || null,
+      status: form.value.status,
+      start_date: null,
+      end_date: form.value.endDate || null,
+      pull_request: form.value.pullRequest || null,
+    };
+
+    try {
+      await tasksStore.createNewTask(projectId, statement);
+      closeModal();
+    } catch (error) {
+      console.error("Task creating error:", error);
+      alert("Something goes wrong while creating the task!");
+    }
   }
 };
 </script>
