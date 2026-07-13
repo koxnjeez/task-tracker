@@ -3,6 +3,7 @@
     <h1>{{ projectTitle }}</h1>
     <div class="buttons-container">
       <button class="button" @click="openCreateModal">Add new task</button>
+      <button class="button">Statuses Management</button>
       <button class="button" @click="assignManagement = true">
         Employee Assignment Management
       </button>
@@ -30,6 +31,10 @@
     v-model="openModal"
     :editingTask="selectedTask"
   ></modal-task>
+  <modal-statuses
+    v-if="statusesManagement"
+    v-model="statusesManagement"
+  ></modal-statuses>
   <modal-employee-assigning
     v-if="assignManagement"
     v-model="assignManagement"
@@ -39,9 +44,11 @@
 <script setup>
 import ModalTask from "@/components/tasks&projects/ModalTask.vue";
 import ModalEmployeeAssigning from "@/components/tasks&projects/ModalEmployeeAssigning.vue";
+import ModalStatuses from "@/components/tasks&projects/ModalStatuses.vue";
 import Task from "@/components/tasks&projects/Task.vue";
 import { useStoreTasks } from "@/stores/storeTasks";
 import { useStoreProjects } from "@/stores/storeProjects";
+import { useStoreStatuses } from "@/stores/storeStatuses";
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 
@@ -49,14 +56,17 @@ import { useRoute } from "vue-router";
 const route = useRoute();
 const tasksStore = useStoreTasks();
 const projectsStore = useStoreProjects();
+const statusesStore = useStoreStatuses();
 const assignManagement = ref(false);
 const openModal = ref(false);
 const selectedTask = ref(null);
+const statusesManagement = ref(false);
 const projectId = parseInt(route.params.id);
 
 // load when mount
 onMounted(async () => {
   await tasksStore.fetchTasks(projectId);
+  await statusesStore.fetchStatuses(projectId);
 });
 
 // modal variaties

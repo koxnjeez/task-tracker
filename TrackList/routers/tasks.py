@@ -7,12 +7,11 @@ from database import get_db
 from routers.auth import get_current_employee
 from models import Employees, Tasks, ProjectMemberRoles
 from datetime import date
+from routers.auth import ADMIN_ROLE_ID, PM_ROLE_ID
 
 router = APIRouter(prefix='/projects/{project_id}/tasks', tags=['tasks'])
-ADMIN_ROLE_ID = 1
-PM_ROLE_ID = 2
 
-@router.get('/', status_code=status.HTTP_200_OK)
+@router.get('', status_code=status.HTTP_200_OK)
 def read_all_tasks(
   project_id: int,
   session: Session = Depends(get_db)
@@ -29,7 +28,7 @@ class TaskRequest(BaseModel):
   end_date: date | None = Field(default=None)
   pull_request: str | None = Field(default=None)
 
-@router.post('/', status_code=status.HTTP_201_CREATED)
+@router.post('', status_code=status.HTTP_201_CREATED)
 def create_task(
   project_id: int,
   data: TaskRequest,

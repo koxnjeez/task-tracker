@@ -89,7 +89,14 @@ const emit = defineEmits(["update:modelValue"]);
 
 // modal close
 const closeModal = () => {
-  // дозаполнить
+  form.value.title = "";
+  form.value.description = "";
+  form.value.status = "";
+  form.value.startDate = "";
+  form.value.endDate = "";
+  form.value.pullRequest = "";
+  titleValidationError.value = false;
+  endDateValidationError.value = false;
   emit("update:modelValue", false);
 };
 
@@ -192,7 +199,6 @@ const saveTask = async () => {
 <style scoped>
 dialog {
   width: 70%;
-  /* max-width: 20rem; */
 }
 .task_title {
   justify-self: center;
