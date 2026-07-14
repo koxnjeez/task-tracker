@@ -183,4 +183,15 @@ input:checked + .slider:before {
   font-weight: 500;
   border-radius: 5px;
 }
+[type="text"]::placeholder {
+  color: #444;
+}
+.error-message {
+  margin: 0.2rem 0 0 0;
+  font-size: small;
+  color: rgb(255, 90, 90);
+}
+.error {
+  border: 3px solid rgb(255, 90, 90);
+}
 </style>

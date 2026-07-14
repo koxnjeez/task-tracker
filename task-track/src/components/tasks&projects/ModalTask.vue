@@ -23,6 +23,9 @@
           <option value="todo">TO DO</option>
           <option value="inprogress">IN PROGRESS</option>
           <option value="done">DONE</option>
+          <option v-for="status in statusesStore.statuses" :key="status.id">
+            {{ status.title.toUpperCase() }}
+          </option>
         </select>
         <label for="task-start-date">Start date</label>
         <input
@@ -53,10 +56,12 @@
 <script setup>
 import { nextTick, onMounted, onUnmounted, ref } from "vue";
 import { useStoreTasks } from "@/stores/storeTasks";
+import { useStoreStatuses } from "@/stores/storeStatuses";
 import { useRoute } from "vue-router";
 
 // data
 const tasksStore = useStoreTasks();
+const statusesStore = useStoreStatuses();
 const route = useRoute();
 const titleInputFieldRef = ref(null);
 const today = new Date().toISOString().split("T")[0];
@@ -235,14 +240,6 @@ label {
 }
 label:first-child {
   margin: 0;
-}
-.error-message {
-  margin: 0.2rem 0 0 0;
-  font-size: small;
-  color: rgb(255, 90, 90);
-}
-.error {
-  border: 3px solid rgb(255, 90, 90);
 }
 .button {
   margin-top: 3rem;

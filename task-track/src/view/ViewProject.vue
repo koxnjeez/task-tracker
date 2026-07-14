@@ -3,7 +3,9 @@
     <h1>{{ projectTitle }}</h1>
     <div class="buttons-container">
       <button class="button" @click="openCreateModal">Add new task</button>
-      <button class="button">Statuses Management</button>
+      <button class="button" @click="statusesManagement = true">
+        Statuses Management
+      </button>
       <button class="button" @click="assignManagement = true">
         Employee Assignment Management
       </button>
@@ -67,6 +69,15 @@ const projectId = parseInt(route.params.id);
 onMounted(async () => {
   await tasksStore.fetchTasks(projectId);
   await statusesStore.fetchStatuses(projectId);
+
+  if (projectsStore.projects.length === 0) {
+    try {
+      await projectsStore.fetchProjects();
+    } catch (error) {
+      console.error("Failed to fetch the project:", error);
+      throw error;
+    }
+  }
 });
 
 // modal variaties
@@ -81,8 +92,11 @@ const openEditModal = (task) => {
 
 // computed
 const projectTitle = computed(() => {
-  return projectsStore.projects.find((project) => project.id === projectId)
-    .title;
+  const project = projectsStore.projects.find(
+    (project) => project.id === projectId,
+  );
+
+  return project?.title || "Loading...";
 });
 </script>
 

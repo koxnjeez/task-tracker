@@ -94,7 +94,7 @@ def delete_project_status(
   tasks_connected = session.scalar(
     select(Tasks).where(Tasks.status == status_item.title).limit(1)
   )
-  if not tasks_connected:
+  if tasks_connected:
     raise HTTPException(
       status_code=status.HTTP_400_BAD_REQUEST,
       detail='Cannot delete the status, because existed tasks contain it'
