@@ -1,6 +1,5 @@
 import axios from "axios";
 import { useStoreEmployee } from "@/stores/storeEmployee";
-import router from "@/router";
 
 const api = axios.create({
   baseURL: "http://localhost:8000",

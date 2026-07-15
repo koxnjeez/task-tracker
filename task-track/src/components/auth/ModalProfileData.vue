@@ -112,8 +112,20 @@ dialog {
   display: flex;
   flex-direction: column;
 }
-[type="text"] {
+.personal-data-form input {
   margin-bottom: 0.75rem;
+  height: 1.8rem;
+  padding-left: 0.5rem;
+  background: rgba(255, 255, 255, 0.4);
+  color: black;
+  box-shadow: 0 4px 8px rgba(27, 27, 27, 0.3);
+  backdrop-filter: blur(16px);
+  outline: none;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  border: none;
+  border-radius: 5px;
 }
 .button {
   margin-top: 1rem;

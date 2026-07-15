@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from database import engine
 import models
 from fastapi.middleware.cors import CORSMiddleware
-from routers import auth, projects, tasks, statuses
+from routers import auth, projects
 
 app = FastAPI()
 
@@ -18,5 +18,3 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(projects.router)
-app.include_router(tasks.router)
-app.include_router(statuses.router)

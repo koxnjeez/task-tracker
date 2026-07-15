@@ -11,8 +11,6 @@ from starlette import status
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 security = HTTPBearer()
-ADMIN_ROLE_ID = 1
-PM_ROLE_ID = 2
 
 def authenticate_with_google(session: Session, token: str):
   payload = verify_google_token(token)
