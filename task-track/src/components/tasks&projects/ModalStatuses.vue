@@ -87,6 +87,7 @@ const handleKeybord = (e) => {
   }
 };
 
+// load when mount
 onMounted(async () => {
   document.addEventListener("keyup", handleKeybord);
 

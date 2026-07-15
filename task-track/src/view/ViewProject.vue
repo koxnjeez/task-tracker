@@ -6,7 +6,7 @@
       <button class="button" @click="statusesManagement = true">
         Statuses Management
       </button>
-      <button class="button" @click="assignManagement = true">
+      <button class="button" @click="projectMemberManagement = true">
         Employee Assignment Management
       </button>
     </div>
@@ -25,6 +25,7 @@
         :key="task.id"
         :task="task"
         @click="openEditModal(task)"
+        @openTaskAssigning="openAssignmentManagment(task.id)"
       ></task>
     </ul>
   </div>
@@ -37,16 +38,22 @@
     v-if="statusesManagement"
     v-model="statusesManagement"
   ></modal-statuses>
-  <modal-employee-assigning
-    v-if="assignManagement"
-    v-model="assignManagement"
-  ></modal-employee-assigning>
+  <modal-project-members
+    v-if="projectMemberManagement"
+    v-model="projectMemberManagement"
+  ></modal-project-members>
+  <modal-assignees
+    v-if="assignmentManagement"
+    v-model="assignmentManagement"
+    :taskId="taskId"
+  ></modal-assignees>
 </template>
 
 <script setup>
 import ModalTask from "@/components/tasks&projects/ModalTask.vue";
-import ModalEmployeeAssigning from "@/components/tasks&projects/ModalEmployeeAssigning.vue";
+import ModalProjectMembers from "@/components/tasks&projects/ModalProjectMembers.vue";
 import ModalStatuses from "@/components/tasks&projects/ModalStatuses.vue";
+import ModalAssignees from "@/components/tasks&projects/ModalAssignees.vue";
 import Task from "@/components/tasks&projects/Task.vue";
 import { useStoreTasks } from "@/stores/storeTasks";
 import { useStoreProjects } from "@/stores/storeProjects";
@@ -59,11 +66,13 @@ const route = useRoute();
 const tasksStore = useStoreTasks();
 const projectsStore = useStoreProjects();
 const statusesStore = useStoreStatuses();
-const assignManagement = ref(false);
+const projectMemberManagement = ref(false);
 const openModal = ref(false);
 const selectedTask = ref(null);
 const statusesManagement = ref(false);
+const assignmentManagement = ref(false);
 const projectId = parseInt(route.params.id);
+const taskId = ref(null);
 
 // load when mount
 onMounted(async () => {
@@ -98,6 +107,11 @@ const projectTitle = computed(() => {
 
   return project?.title || "Loading...";
 });
+
+const openAssignmentManagment = (task_id) => {
+  taskId.value = task_id;
+  assignmentManagement.value = true;
+};
 </script>
 
 <style scoped>
@@ -121,8 +135,9 @@ h1 {
 }
 .headers-section {
   display: flex;
-  gap: 0.5rem;
+  gap: 1.5rem;
   padding: 1.5rem;
+  padding-right: 4.5rem;
   margin-top: 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.7);
 }

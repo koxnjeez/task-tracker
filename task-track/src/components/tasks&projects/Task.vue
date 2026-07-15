@@ -21,6 +21,26 @@
     <div class="task-pull-request-section">
       {{ task.pull_request }}
     </div>
+    <button
+      class="task-assignees-section"
+      @click.stop="$emit('openTaskAssigning')"
+    >
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M21 19.9999C21 18.2583 19.3304 16.7767 17 16.2275M15 20C15 17.7909 12.3137 16 9 16C5.68629 16 3 17.7909 3 20M15 13C17.2091 13 19 11.2091 19 9C19 6.79086 17.2091 5 15 5M9 13C6.79086 13 5 11.2091 5 9C5 6.79086 6.79086 5 9 5C11.2091 5 13 6.79086 13 9C13 11.2091 11.2091 13 9 13Z"
+          stroke="white"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
   </div>
 </template>
 
@@ -32,12 +52,15 @@ const props = defineProps({
     required: true,
   },
 });
+
+// emits
+const emit = defineEmits(["openTaskAssigning"]);
 </script>
 
 <style scoped>
 .task-card {
   display: flex;
-  gap: 0.5rem;
+  gap: 1.5rem;
   padding: 0 1.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.7);
   cursor: pointer;
@@ -66,5 +89,11 @@ const props = defineProps({
 }
 .task-pull-request-section {
   width: 15%;
+}
+.task-assignees-section {
+  background: transparent;
+  border: none;
+  height: fit-content;
+  cursor: pointer;
 }
 </style>

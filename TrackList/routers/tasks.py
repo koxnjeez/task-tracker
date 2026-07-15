@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, select
 from database import get_db
 from routers.auth import get_current_employee
-from models import Employees, Tasks, ProjectMemberRoles
+from models import Employees, Tasks, ProjectMemberRoles, Assignees
 from datetime import date
 from routers.auth import ADMIN_ROLE_ID, PM_ROLE_ID
 
@@ -103,3 +103,44 @@ def edit_task_info(
       )
 
   return task
+
+@router.get('/{task_id}/assignees', status_code=status.HTTP_200_OK)
+def get_task_assignees_separation(
+  project_id: int,
+  task_id: int,
+  session: Session = Depends(get_db)
+):
+  project_members_query = (
+    select(Employees)
+    .join(ProjectMemberRoles, ProjectMemberRoles.employee_id == Employees.id)
+    .where(ProjectMemberRoles.project_id == project_id)
+    .distinct()
+  )
+  project_members = session.scalars(project_members_query).all()
+
+  assigned_query = (
+    select(Assignees.employee_id)
+    .where(Assignees.task_id == task_id)
+  )
+  assigned_ids = session.scalars(assigned_query).all()
+
+  assigned_list = []
+  unassigned_list = []
+
+  for employee in project_members:
+    employee_data = {
+      'id': employee.id,
+      'first_name': employee.first_name,
+      'last_name': employee.last_name,
+      'middle_name': employee.middle_name
+    }
+
+    if employee.id in assigned_ids:
+      assigned_list.append(employee_data)
+    else:
+      unassigned_list.append(employee_data)
+
+  return {
+    'assigned': assigned_list,
+    'unassigned': unassigned_list
+  }
