@@ -7,11 +7,11 @@ from starlette import status
 from sqlalchemy.orm import Session
 from database import get_db
 from models import Employees, Projects, ProjectMemberRoles, Roles
+from routers.auth import ADMIN_ROLE_ID
 
 router = APIRouter(prefix="/projects", tags=["projects"])
-ADMIN_ROLE_ID = 1
 
-@router.get('/', status_code=status.HTTP_200_OK)
+@router.get('', status_code=status.HTTP_200_OK)
 def read_all_projects(
   session: Session = Depends(get_db),
   employee: Employees = Depends(get_current_employee)

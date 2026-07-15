@@ -9,6 +9,9 @@ export const useStoreEmployee = defineStore("storeEmployee", {
       token: localStorage.getItem("access_token") || null,
       otherEmployees: [],
       employeesLoaded: false,
+      assigned: [],
+      unassigned: [],
+      assigneesLoaded: false,
     };
   },
   getters: {
@@ -48,6 +51,9 @@ export const useStoreEmployee = defineStore("storeEmployee", {
         this.user = null;
         this.otherEmployees = [];
         this.employeesLoaded = false;
+        this.assigned = [];
+        this.unassigned = [];
+        this.assigneesLoaded = false;
         localStorage.removeItem("access_token");
 
         const projectsStore = useStoreProjects();
@@ -75,6 +81,21 @@ export const useStoreEmployee = defineStore("storeEmployee", {
         return this.otherEmployees;
       } catch (error) {
         console.error("Failed loading the rest employees:", error);
+      }
+    },
+    async fetchAssigneesData(task_id, project_id) {
+      if (this.assigneesLoaded) return;
+
+      try {
+        const response = await api.get(
+          `/projects/${project_id}/tasks/${task_id}/assignees`,
+        );
+        this.assigned = response.data.assigned;
+        this.unassigned = response.data.unassigned;
+        this.assigneesLoaded = true;
+      } catch (error) {
+        console.error("Failed to fetch assignees data:", error);
+        throw error;
       }
     },
   },

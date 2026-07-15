@@ -33,15 +33,18 @@ import ModalProject from "@/components/tasks&projects/ModalProject.vue";
 import Project from "@/components/tasks&projects/Project.vue";
 import { ref, onMounted } from "vue";
 
+// data
 const employeeStore = useStoreEmployee();
 const projectsStore = useStoreProjects();
 const openModal = ref(false);
 const selectedProject = ref(null);
 
+// load when mount
 onMounted(async () => {
   await projectsStore.fetchProjects();
 });
 
+// modal variaties
 const openCreateModal = () => {
   selectedProject.value = null;
   openModal.value = true;
@@ -73,6 +76,7 @@ const openEditModal = (project) => {
 }
 .headers-section {
   display: flex;
+  gap: 0.5rem;
   padding: 1.5rem;
   font-weight: 900;
   border-bottom: 1px solid rgba(255, 255, 255, 0.7);

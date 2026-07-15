@@ -15,11 +15,11 @@ class Tasks(Base):
 
   id: Mapped[int] = mapped_column(BigInteger, primary_key=True, index=True)
   title: Mapped[str] = mapped_column(String(255))
-  description: Mapped[str] = mapped_column(Text)
+  description: Mapped[str | None] = mapped_column(Text)
   status: Mapped[str] = mapped_column(String(100))
-  start_date: Mapped[Date] = mapped_column(Date)
-  end_date: Mapped[Date] = mapped_column(Date)
-  pull_request: Mapped[str] = mapped_column(Text)
+  start_date: Mapped[Date | None] = mapped_column(Date)
+  end_date: Mapped[Date | None] = mapped_column(Date)
+  pull_request: Mapped[str | None] = mapped_column(Text)
   project_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('projects.id'))
 
 class Employees(Base):
@@ -75,13 +75,13 @@ class Comments(Base):
     server_default=func.now(),
     nullable=False
   )
-  
+
 class BacklogTasks(Base):
   __tablename__ = 'backlog_tasks'
 
   id: Mapped[int] = mapped_column(BigInteger, primary_key=True, index=True)
   title: Mapped[str] = mapped_column(String(50))
-  description: Mapped[str] = mapped_column(Text)
+  description: Mapped[str | None] = mapped_column(Text)
   project_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('projects.id'))
 
 class Statuses(Base):

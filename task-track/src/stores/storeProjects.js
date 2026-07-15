@@ -27,7 +27,7 @@ export const useStoreProjects = defineStore("storeProjects", {
         const updatedProject = response.data;
 
         const index = this.projects.findIndex(
-          (p) => p.id === updatedProject.id,
+          (project) => project.id === updatedProject.id,
         );
         if (index !== -1) {
           this.projects[index] = updatedProject;
@@ -46,7 +46,7 @@ export const useStoreProjects = defineStore("storeProjects", {
         this.projects = response.data;
         this.projectsLoaded = true;
       } catch (error) {
-        console.error("Failed to fatch available projects:", error);
+        console.error("Failed to fetch available projects:", error);
         throw error;
       }
     },

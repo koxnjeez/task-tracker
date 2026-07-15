@@ -36,6 +36,7 @@
 <script setup>
 import router from "@/router";
 
+// props
 const props = defineProps({
   project: {
     type: Object,
@@ -43,20 +44,22 @@ const props = defineProps({
   },
 });
 
+// emits
 const emit = defineEmits("updateProject");
 </script>
 
 <style scoped>
 .project-card {
   display: flex;
+  gap: 0.5rem;
   padding: 0 1.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.7);
 }
-.project-card [class^="project"] {
-  padding: 1rem 0;
-}
 .project-card:last-child {
   border-bottom: none;
+}
+.project-card [class^="project"] {
+  padding: 1rem 0;
 }
 .project-id-section {
   width: 10%;
