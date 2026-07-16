@@ -20,7 +20,7 @@
       <div class="statuses-container">
         <ul class="statuses-list">
           <li
-            class="status-item"
+            class="status-item list-item"
             v-for="status in statusesStore.statuses"
             :key="status.id"
           >
@@ -160,13 +160,6 @@ dialog {
   padding: 0.5rem;
 }
 .status-item {
-  list-style: none;
-  background: rgba(0, 0, 0, 0.6);
-  margin-bottom: 0.3rem;
-  padding: 0.5rem 0.7rem;
-  border-radius: 10px;
-  border: 3px solid transparent;
-  box-shadow: 0 4px 8px rgba(27, 27, 27, 0.3);
   display: flex;
   justify-content: space-between;
 }

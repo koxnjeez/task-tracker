@@ -5,11 +5,47 @@
       <div class="assignees-section">
         <div class="available-assignees">
           <h4>Available assignees</h4>
-          <div class="employees-section"></div>
+          <div class="employees-section">
+            <ul class="assignee-list">
+              <li
+                class="assignee-item list-item"
+                v-for="assignee in employeeStore.unassigned"
+                :key="assignee.id"
+                @click="
+                  employeeStore.assignEmployee(
+                    assignee,
+                    props.taskId,
+                    projectId,
+                  )
+                "
+              >
+                {{ assignee.first_name }} {{ assignee.last_name }}
+                {{ assignee.middle_name }}
+              </li>
+            </ul>
+          </div>
         </div>
         <div class="busy-assignees">
           <h4>Assignees on the task</h4>
-          <div class="employees-section"></div>
+          <div class="employees-section">
+            <ul class="assignee-list">
+              <li
+                class="assignee-item list-item"
+                v-for="assignee in employeeStore.assigned"
+                :key="assignee.id"
+                @click="
+                  employeeStore.unassignEmployee(
+                    assignee,
+                    props.taskId,
+                    projectId,
+                  )
+                "
+              >
+                {{ assignee.first_name }} {{ assignee.last_name }}
+                {{ assignee.middle_name }}
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </dialog>
@@ -59,7 +95,6 @@ onMounted(async () => {
   document.addEventListener("keyup", handleKeybord);
 
   await employeeStore.fetchAssigneesData(props.taskId, projectId);
-  console.log(employeeStore.assigned, employeeStore.unassigned);
 });
 
 onUnmounted(() => {
@@ -88,5 +123,9 @@ dialog {
 }
 h4 {
   margin: 0 0 1rem 0;
+}
+.assignee-list {
+  padding: 0.5rem;
+  margin: 0;
 }
 </style>

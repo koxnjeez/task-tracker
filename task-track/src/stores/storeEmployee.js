@@ -11,7 +11,6 @@ export const useStoreEmployee = defineStore("storeEmployee", {
       employeesLoaded: false,
       assigned: [],
       unassigned: [],
-      assigneesLoaded: false,
     };
   },
   getters: {
@@ -53,7 +52,6 @@ export const useStoreEmployee = defineStore("storeEmployee", {
         this.employeesLoaded = false;
         this.assigned = [];
         this.unassigned = [];
-        this.assigneesLoaded = false;
         localStorage.removeItem("access_token");
 
         const projectsStore = useStoreProjects();
@@ -84,7 +82,8 @@ export const useStoreEmployee = defineStore("storeEmployee", {
       }
     },
     async fetchAssigneesData(task_id, project_id) {
-      if (this.assigneesLoaded) return;
+      this.assigned = [];
+      this.unassigned = [];
 
       try {
         const response = await api.get(
@@ -92,9 +91,36 @@ export const useStoreEmployee = defineStore("storeEmployee", {
         );
         this.assigned = response.data.assigned;
         this.unassigned = response.data.unassigned;
-        this.assigneesLoaded = true;
       } catch (error) {
         console.error("Failed to fetch assignees data:", error);
+        throw error;
+      }
+    },
+    async assignEmployee(employee, task_id, project_id) {
+      try {
+        await api.post(`/projects/${project_id}/tasks/${task_id}/assignees`, {
+          employee_id: employee.id,
+        });
+
+        this.unassigned = this.unassigned.filter((e) => e.id !== employee.id);
+        this.assigned.push(employee);
+      } catch (error) {
+        console.error("Assigning employee error:", error);
+        throw error;
+      }
+    },
+    async unassignEmployee(employee, task_id, project_id) {
+      try {
+        await api.delete(`/projects/${project_id}/tasks/${task_id}/assignees`, {
+          params: {
+            employee_id: employee.id,
+          },
+        });
+
+        this.assigned = this.assigned.filter((e) => e.id !== employee.id);
+        this.unassigned.push(employee);
+      } catch (error) {
+        console.error("Unassigning employee error:", error);
         throw error;
       }
     },

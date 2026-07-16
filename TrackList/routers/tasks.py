@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from starlette import status
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, select
+from sqlalchemy import and_, or_, select
 from database import get_db
 from routers.auth import get_current_employee
 from models import Employees, Tasks, ProjectMemberRoles, Assignees
@@ -144,3 +144,79 @@ def get_task_assignees_separation(
     'assigned': assigned_list,
     'unassigned': unassigned_list
   }
+
+class AssignEmployee(BaseModel):
+  employee_id: int
+
+@router.post('/{task_id}/assignees', status_code=status.HTTP_201_CREATED)
+def assign_employee_to_task(
+  task_id: int,
+  payload: AssignEmployee,
+  session: Session = Depends(get_db)
+):
+  already_assigned = session.scalar(
+    select(Assignees).where(
+      and_(
+        Assignees.task_id == task_id,
+        Assignees.employee_id == payload.employee_id
+      )
+    )
+  )
+  if already_assigned:
+    raise HTTPException(
+      status_code=status.HTTP_400_BAD_REQUEST,
+      detail='Employee is already assigned'
+    )
+
+  new_assignee = Assignees(
+    task_id=task_id,
+    employee_id=payload.employee_id
+  )
+  try:
+    session.add(new_assignee)
+    session.commit()
+    session.refresh(new_assignee)
+  except Exception as e:
+    session.rollback()
+    raise HTTPException(
+      status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+      detail='Failed employee assigning'
+    )
+
+  employee = session.get(Employees, payload.employee_id)
+  return {
+    'id': employee.id,
+    'first_name': employee.first_name,
+    'last_name': employee.last_name,
+    'middle_name': employee.middle_name
+  }
+
+@router.delete('/{task_id}/assignees', status_code=status.HTTP_204_NO_CONTENT)
+def unassign_employee_from_task(
+  task_id: int,
+  employee_id: int,
+  session: Session = Depends(get_db)
+):
+  already_assigned = session.scalar(
+    select(Assignees).where(
+      and_(
+        Assignees.task_id == task_id,
+        Assignees.employee_id == employee_id
+      )
+    )
+  )
+  if not already_assigned:
+    raise HTTPException(
+      status_code=status.HTTP_400_BAD_REQUEST,
+      detail='Employee is not assigned'
+    )
+
+  try:
+    session.delete(already_assigned)
+    session.commit()
+  except Exception as e:
+    session.rollback()
+    raise HTTPException(
+      status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+      detail='Failed employee unassigning'
+    )

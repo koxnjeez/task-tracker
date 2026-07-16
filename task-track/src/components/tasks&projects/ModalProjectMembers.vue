@@ -8,7 +8,7 @@
             <li
               v-for="employee in employeeStore.otherEmployees"
               :key="employee.id"
-              class="employee-item"
+              class="employee-item list-item"
               :class="{
                 'selected-employee': employee.id == selectedEmployeeId,
                 'project-member': selectedRolesMap[employee.id]?.length > 0,
@@ -171,16 +171,6 @@ dialog {
 .employees-list {
   padding: 1rem;
   margin: 0;
-}
-.employee-item {
-  list-style: none;
-  box-sizing: content-box;
-  background: rgba(0, 0, 0, 0.6);
-  margin-bottom: 0.3rem;
-  padding: 0.5rem 0.7rem;
-  border-radius: 10px;
-  border: 3px solid transparent;
-  box-shadow: 0 4px 8px rgba(27, 27, 27, 0.3);
 }
 .project-member {
   border: 3px solid rgba(255, 255, 255, 0.6);

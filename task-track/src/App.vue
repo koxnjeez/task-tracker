@@ -194,4 +194,14 @@ input:checked + .slider:before {
 .error {
   border: 3px solid rgb(255, 90, 90);
 }
+.list-item {
+  list-style: none;
+  box-sizing: content-box;
+  background: rgba(0, 0, 0, 0.6);
+  margin-bottom: 0.3rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 10px;
+  border: 3px solid transparent;
+  box-shadow: 0 4px 8px rgba(27, 27, 27, 0.3);
+}
 </style>
